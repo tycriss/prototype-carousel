@@ -32,6 +32,7 @@ Carousel = Class.create(Abstract, {
 
 		this.options    = Object.extend({
             duration:           1,
+            auto:               false,
             frequency:          3,
             visibleSlides:      1,
             controlClassName:   'carousel-control',
@@ -40,8 +41,7 @@ Carousel = Class.create(Abstract, {
             selectedClassName:  'carousel-selected',
             circular:           false,
             effect:             'scroll',
-            transition:         'sinoidal',
-            auto:               false
+            transition:         'sinoidal'
         }, options || {});
         
         if (this.options.effect == 'fade') {
@@ -126,6 +126,9 @@ Carousel = Class.create(Abstract, {
                                 if (this.controls) {
                                     this.activateControls();
                                 }
+                                if (this.options.afterMove && (typeof this.options.afterMove == 'function')) {
+                                    this.options.afterMove();
+                                }
                             }).bind(this)
                         });
                     }
@@ -152,15 +155,14 @@ Carousel = Class.create(Abstract, {
                     afterFinish: (function () {
                         if (this.controls) {
                             this.activateControls();
+                        }
+                        if (this.options.afterMove && (typeof this.options.afterMove == 'function')) {
+                            this.options.afterMove();
                         }                        
                         this.scrolling = false;
                     }).bind(this)});
             break;
         }
-
-		if (this.options.afterMove && (typeof this.options.afterMove == 'function')) {
-			this.options.afterMove();
-		}
 
 		return false;
 	},
