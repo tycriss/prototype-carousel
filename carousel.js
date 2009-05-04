@@ -40,6 +40,7 @@ Carousel = Class.create(Abstract, {
             disabledClassName:  'carousel-disabled',
             selectedClassName:  'carousel-selected',
             circular:           false,
+            wheel:              true,
             effect:             'scroll',
             transition:         'sinoidal'
         }, options || {});
@@ -54,6 +55,10 @@ Carousel = Class.create(Abstract, {
 
 		if (this.controls) {
             this.controls.invoke('observe', 'click', this.click.bind(this));
+        }
+        
+        if (this.options.wheel) {            
+            this.scroller.observe('mousewheel', this.wheel.bindAsEventListener(this)).observe('DOMMouseScroll', this.wheel.bindAsEventListener(this));;
         }
 
         if (this.options.auto) {
@@ -253,6 +258,32 @@ Carousel = Class.create(Abstract, {
 			this.next();
         }
 		this.timer = setTimeout(this.periodicallyUpdate.bind(this), this.options.frequency * 1000);
+    },
+    
+    wheel: function (event) {
+        event.cancelBubble = true;
+        event.stop();
+        
+		var delta = 0;
+		if (!event) {
+            event = window.event;
+        }
+		if (event.wheelDelta) {
+			delta = event.wheelDelta / 120; 
+		} else if (event.detail) { 
+            delta = -event.detail / 3;	
+        }        
+       
+        if (!this.scrolling) {
+            this.deactivateControls();
+            if (delta > 0) {
+                this.prev();
+            } else {
+                this.next();
+            }            
+        }
+        
+		return Math.round(delta); //Safari Round
     },
 
 	deactivateControls: function () {
